@@ -242,7 +242,7 @@ class EquationSolverApp:
         self.entry_param3 = tk.Entry(top_options_frame, validate="key", validatecommand=vcmd)
         self.entry_param3.grid(row=5, column=1, sticky=tk.E, padx=5)
         validate_btn3 = tk.Button(top_options_frame, text="Valider", command=self.on_validate_param2)
-        validate_btn3.grid(row=5, column=2, sticky=tk.E, padx=5)
+        validate_btn3.grid(row=5, column=2, sticky=tk.E, padx=10)
 
         label_pas_espace = tk.Label(top_options_frame, text="Pas Spatial :", font=("Arial", 10))
         label_pas_espace.grid(row=6, column=0,  sticky=tk.E, padx=10)
