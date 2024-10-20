@@ -1,0 +1,169 @@
+import tkinter as tk
+from tkinter import ttk
+
+class EquationSolverApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Équation Différentielle Solver")
+
+        # Calculer la taille de l'écran
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        # Définir la taille de la fenêtre (80% de l'écran)
+        window_width = int(screen_width * 0.8)
+        window_height = int(screen_height * 0.8)
+
+        # Centrer la fenêtre
+        x_coordinate = int((screen_width / 2) - (window_width / 2))
+        y_coordinate = int((screen_height / 2) - (window_height / 2))
+
+        # Appliquer les dimensions et positionner la fenêtre
+        self.root.geometry(f"{window_width}x{window_height}+{x_coordinate}+{y_coordinate}")
+
+        # Configurer le style
+        style = ttk.Style()
+        style.configure("TFrame", background="#B0E0E6")  # Teinte de bleu clair
+
+        # Configurer la disposition principale
+        self.main_frame = ttk.Frame(self.root)  # Utilisation de ttk.Frame sans bg
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Partie gauche pour spécifier l'équation (40% de la largeur)
+        self.left_frame = ttk.Frame(self.main_frame)  # Pas de largeur fixée ici
+        self.left_frame.pack(side=tk.LEFT, fill=tk.Y, expand=False)  # Ne pas étendre, occuper 40%
+
+        # Choix du type d'équation
+        self.equation_case_label = tk.Label(self.left_frame, text="Type d'Équation:", background='#B0E0E6')  # Bleu clair
+        self.equation_case_label.pack(pady=10)
+
+        self.equation_case = tk.StringVar(value="unique")  # Valeur par défaut
+
+        self.unique_equation_radio = tk.Radiobutton(self.left_frame, text="Équation Unique", variable=self.equation_case, value="unique", background='#B0E0E6', command=self.update_equation_input)
+        self.system_equation_radio = tk.Radiobutton(self.left_frame, text="Système d'Équations", variable=self.equation_case, value="system", background='#B0E0E6', command=self.update_equation_input)
+
+        # Disposition verticale des boutons radio
+        self.unique_equation_radio.pack(pady=5)  # Espacement vertical
+        self.system_equation_radio.pack(pady=5)  # Espacement vertical
+
+        # Zone de texte pour l'équation
+        self.equation_label = tk.Label(self.left_frame, text="Entrez l'Équation:", background='#B0E0E6')  # Bleu clair
+        self.equation_label.pack(pady=10)
+
+        # Conteneur pour les champs de saisie d'équations
+        self.equation_entry_frame = ttk.Frame(self.left_frame)
+        self.equation_entry_frame.pack(pady=5)
+
+        # Champ de saisie d'équation
+        self.equation_entry = tk.Entry(self.equation_entry_frame)
+        self.equation_entry.pack(pady=5, padx=5, fill=tk.X)  # Utiliser pack avec fill
+
+        # Boutons pour spécifier le nombre d'équations
+        self.num_equations_label = tk.Label(self.left_frame, text="Nombre d'Équations:", background='#B0E0E6')  # Bleu clair
+        self.num_equations_label.pack(pady=10)
+
+        self.num_equations = tk.StringVar(value="1")  # Valeur par défaut
+        self.num_equations_radio_frame = ttk.Frame(self.left_frame)
+        self.num_equations_radio_frame.pack(pady=5)
+
+        self.one_equation_radio = tk.Radiobutton(self.num_equations_radio_frame, text="1", variable=self.num_equations, value="1", background='#B0E0E6', command=self.update_equation_input)
+        self.two_equations_radio = tk.Radiobutton(self.num_equations_radio_frame, text="2", variable=self.num_equations, value="2", background='#B0E0E6', command=self.update_equation_input)
+
+        self.one_equation_radio.pack(side=tk.LEFT, padx=5)  # Disposition horizontale
+        self.two_equations_radio.pack(side=tk.LEFT, padx=5)  # Disposition horizontale
+
+        # Boutons pour les symboles
+        self.symbol_frame = ttk.Frame(self.left_frame)
+        self.symbol_frame.pack(pady=10)
+
+        # Liste de symboles d'opération
+        operation_symbols = ['+', '-', '*', '/']
+        for symbol in operation_symbols:
+            button = tk.Button(self.symbol_frame, text=symbol, command=lambda s=symbol: self.insert_symbol(s))
+            button.pack(side=tk.LEFT, padx=5)
+
+        # Liste de symboles de dérivée
+        derivative_symbols = ["∂", "d/dx", "d²/dt²", "∂²/∂x²", "∂²/∂y²", "∂²/∂x∂y"]
+        for symbol in derivative_symbols:
+            button = tk.Button(self.symbol_frame, text=symbol, command=lambda s=symbol: self.insert_derivative(s))
+            button.pack(side=tk.LEFT, padx=5)
+
+        # Bouton de résolution
+        self.solve_button = tk.Button(self.left_frame, text="Résoudre", command=self.solve_equation)
+        self.solve_button.pack(pady=10)
+
+        # Division noire entre les deux parties
+        self.divider = tk.Frame(self.main_frame, width=2, bg='black')
+        self.divider.pack(side=tk.LEFT, fill=tk.Y)  # Remplir verticalement
+
+        # Partie droite pour la visualisation (60% de la largeur)
+        self.right_frame = ttk.Frame(self.main_frame)  # Pas de largeur fixée ici
+        self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)  # Étendre pour occuper 60%
+
+        # Réduire la taille de la zone de visualisation
+        self.visualization_frame = ttk.Frame(self.right_frame)
+        self.visualization_frame.pack(side=tk.TOP, fill=tk.X, expand=True)  # Remplir horizontalement
+
+        self.visualization_label = tk.Label(self.visualization_frame, text="Visualisation des Solutions", background='#B0E0E6')  # Bleu clair
+        self.visualization_label.pack(pady=10)
+
+        # Zone pour afficher les graphiques
+        self.visualization_canvas = tk.Canvas(self.visualization_frame, bg='white')
+        self.visualization_canvas.pack(fill=tk.BOTH, expand=True)
+
+        # Cadre pour le schéma
+        self.diagram_frame = ttk.Frame(self.right_frame)  # Cadre pour le schéma
+        self.diagram_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)  # Étendre pour occuper le reste
+
+        self.diagram_label = tk.Label(self.diagram_frame, text="Schéma", background='#B0E0E6')  # Bleu clair
+        self.diagram_label.pack(pady=10)
+
+        self.diagram_canvas = tk.Canvas(self.diagram_frame, bg='white')
+        self.diagram_canvas.pack(fill=tk.BOTH, expand=True)
+
+        # Mise à jour initiale des entrées
+        self.update_equation_input()
+
+    def update_equation_input(self):
+        # Vider le cadre des entrées d'équations existantes
+        for widget in self.equation_entry_frame.winfo_children():
+            widget.destroy()
+
+        # Afficher un seul champ de saisie ou plusieurs en fonction de l'option choisie
+        if self.equation_case.get() == "unique":
+            # Afficher un seul champ de saisie
+            self.equation_entry = tk.Entry(self.equation_entry_frame)
+            self.equation_entry.pack(pady=5, padx=5, fill=tk.X)  # Utiliser pack avec fill
+        elif self.equation_case.get() == "system":
+            # Afficher plusieurs champs de saisie en fonction du nombre d'équations
+            num_equations = int(self.num_equations.get())
+            for i in range(num_equations):
+                entry = tk.Entry(self.equation_entry_frame)
+                entry.pack(pady=5, padx=5, fill=tk.X)  # Utiliser pack avec fill
+
+    def insert_symbol(self, symbol):
+        # Insérer le symbole au curseur dans le champ d'entrée actif
+        current_widget = self.equation_entry_frame.winfo_children()[-1]  # Récupérer le dernier champ (celui d'entrée actif)
+        current_position = current_widget.index(tk.INSERT)  # Position actuelle du curseur
+        current_widget.insert(current_position, symbol)  # Insérer le symbole
+        current_widget.focus()  # Reprendre le focus sur le champ d'entrée
+
+    def insert_derivative(self, symbol):
+        # Insérer le symbole de dérivée avec une parenthèse ouvrante
+        current_widget = self.equation_entry_frame.winfo_children()[-1]  # Récupérer le dernier champ (celui d'entrée actif)
+        current_position = current_widget.index(tk.INSERT)  # Position actuelle du curseur
+        current_widget.insert(current_position, f"{symbol}(")  # Insérer le symbole de dérivée et la parenthèse
+        current_widget.focus()  # Reprendre le focus sur le champ d'entrée
+
+    def solve_equation(self):
+        # Code pour résoudre l'équation
+        equations = []
+        for widget in self.equation_entry_frame.winfo_children():
+            equations.append(widget.get())  # Récupérer le texte de chaque champ
+        eq_case = self.equation_case.get()
+        print(f"Résolution des équations : {equations}, Cas : {eq_case}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = EquationSolverApp(root)
+    root.mainloop()

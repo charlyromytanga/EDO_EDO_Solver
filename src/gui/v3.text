@@ -1,0 +1,112 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+from src.solvers.ode_solver import ODESolver
+from src.solvers.pde_solver import PDESolver
+from src.visualization.plot_results import PlotResults
+import numpy as np
+
+class EquationInputParser:
+    def __init__(self, equation_type, num_base_eq, num_boundary_eq, num_initial_conditions):
+        self.equation_type = equation_type
+        self.num_base_eq = num_base_eq
+        self.num_boundary_eq = num_boundary_eq
+        self.num_initial_conditions = num_initial_conditions
+        self.base_equations = []
+        self.boundary_conditions = []
+        self.initial_conditions = []
+
+    def add_base_equation(self, eq):
+        if len(self.base_equations) < self.num_base_eq:
+            self.base_equations.append(eq)
+
+    def add_boundary_condition(self, bc):
+        if len(self.boundary_conditions) < self.num_boundary_eq:
+            self.boundary_conditions.append(bc)
+
+    def add_initial_condition(self, ic):
+        if len(self.initial_conditions) < self.num_initial_conditions:
+            self.initial_conditions.append(ic)
+
+
+class GUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Résolution d'Équations Différentielles")
+        
+        # Widgets pour la saisie des équations
+        self.create_widgets()
+
+    def create_widgets(self):
+        # Champ pour entrer les équations
+        self.equation_label = tk.Label(self.root, text="Entrer l'équation :")
+        self.equation_label.pack()
+
+        self.equation_entry = tk.Entry(self.root, width=50)
+        self.equation_entry.pack()
+
+        # Type d'équation
+        self.equation_type_label = tk.Label(self.root, text="Type d'équation :")
+        self.equation_type_label.pack()
+
+        self.equation_type = ttk.Combobox(self.root, values=["EDO", "EDP"])
+        self.equation_type.pack()
+
+        # Nombre d'équations de base
+        self.num_base_eq_label = tk.Label(self.root, text="Nombre d'équations de base :")
+        self.num_base_eq_label.pack()
+
+        self.num_base_eq_entry = tk.Entry(self.root, width=5)
+        self.num_base_eq_entry.pack()
+
+        # Bouton pour ajouter l'équation
+        self.add_eq_button = tk.Button(self.root, text="Ajouter l'équation", command=self.add_equation)
+        self.add_eq_button.pack()
+
+        # Bouton pour résoudre
+        self.solve_button = tk.Button(self.root, text="Résoudre", command=self.solve_equations)
+        self.solve_button.pack()
+
+        # Zone de résultats
+        self.result_label = tk.Label(self.root, text="Résultats :")
+        self.result_label.pack()
+
+        self.result_area = tk.Text(self.root, height=10, width=60)
+        self.result_area.pack()
+
+    def add_equation(self):
+        equation = self.equation_entry.get()
+        self.result_area.insert(tk.END, f"Équation ajoutée : {equation}\n")
+        # Ajouter ici la logique pour gérer les équations (comme stocker dans une liste)
+
+    def solve_equations(self):
+        # Exemple d'utilisation d'un solveur
+        # Récupérer les valeurs d'entrée
+        equation = self.equation_entry.get()
+        equation_type = self.equation_type.get()
+        num_base_eq = int(self.num_base_eq_entry.get())
+        
+        # Créer l'input parser pour gérer les équations
+        parser = EquationInputParser(equation_type, num_base_eq, 0, 0)
+        parser.add_base_equation(equation)
+
+        # Exemple de solveur (cela doit être basé sur l'entrée réelle)
+        if equation_type == "EDO":
+            solver = ODESolver(lambda y, t: -y, [1], method='euler_explicite', step_time=0.1)
+            results = solver.solve((0, 10))
+
+            # Tracer les résultats
+            time_points = np.arange(0, 10, 0.1)
+            y_values = [res[0] for res in results]
+            plotter = PlotResults(title="Résultat de l'EDO", labels={"x_label": "Temps", "y_label": "y"})
+            plotter.plot_2d(time_points, y_values)
+
+            self.result_area.insert(tk.END, f"Résolution EDO : {results}\n")
+        elif equation_type == "EDP":
+            # Ici vous pouvez ajouter la logique pour résoudre une EDP
+            pass
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    gui = GUI(root)
+    root.mainloop()

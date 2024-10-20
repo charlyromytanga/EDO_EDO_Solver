@@ -1,0 +1,15 @@
+# Ignorer les fichiers de configuration locaux
+.env
+.vscode/
+
+# Ignorer les dossiers de dépendances
+node_modules/
+venv/
+
+# Ignorer les fichiers compilés
+*.pyc
+*.class
+dist/
+
+# Ignorer les fichiers de log
+*.log

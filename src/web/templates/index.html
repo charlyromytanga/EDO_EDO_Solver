@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résolution EDO/EDP</title>
+</head>
+<body>
+    <h1>Résolution d'équations EDO/EDP</h1>
+    <form method="POST">
+        Domaine : 
+        <select name="domain">
+            <option value="EDO">EDO</option>
+            <option value="EDP">EDP</option>
+        </select><br>
+        Equation : <input type="text" name="equation"><br>
+        Constantes : <input type="text" name="constants"><br>
+        Intervalle de temps : <input type="text" name="time_interval" placeholder="ex: 0,10"><br>
+        Pas temporel : <input type="text" name="time_step"><br>
+        Intervalle d'espace (si EDP) : <input type="text" name="space_interval"><br>
+        Pas d'espace (si EDP) : <input type="text" name="space_step"><br>
+        <button type="submit">Résoudre</button>
+    </form>
+
+    {% if plot_url %}
+    <h2>Solution :</h2>
+    <img src="data:image/png;base64,{{ plot_url }}">
+    {% endif %}
+</body>
+</html>
